@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgroSur – Frutas y Verduras</title>
+
+  <!-- COLORES VIVOS TIPO FERIA -->
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: #fffdf5; }
+    header { background: linear-gradient(90deg, #ff9800, #4caf50); color: white; padding: 25px; text-align: center; }
+    header h1 { margin: 0; font-size: 2.2em; }
+    section { padding: 25px; max-width: 1200px; margin: auto; }
+    h2 { margin-top: 40px; }
+    .frutas { color: #e53935; }
+    .verduras { color: #2e7d32; }
+    .hortalizas { color: #6a1b9a; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; }
+    .card { background: white; border-radius: 14px; padding: 15px; box-shadow: 0 6px 14px rgba(0,0,0,0.12); text-align: center; }
+    .card img { width: 100%; height: 150px; object-fit: cover; border-radius: 10px; }
+    .precio { font-size: 1.1em; font-weight: bold; margin: 8px 0; }
+    button { background: #ff9800; color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; cursor: pointer; font-size: 1em; }
+    button:hover { background: #fb8c00; }
+    footer { background: #2e7d32; color: white; text-align: center; padding: 18px; margin-top: 40px; }
+    #carrito { position: fixed; bottom: 0; left: 0; right: 0; background: #ffffff; border-top: 3px solid #4caf50; padding: 15px; box-shadow: 0 -4px 10px rgba(0,0,0,0.15); }
+    #carrito h3 { margin-top: 0; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🌱 AgroSur – Frutas y Verduras</h1>
+  <p><strong>Directo del productor a tu mesa</strong></p>
+</header>
+
+<section>
+  <div style="text-align:center;margin-bottom:20px;">
+    <button onclick="mostrarCategoria('todas')">Todos</button>
+    <button onclick="mostrarCategoria('frutas')">Frutas</button>
+    <button onclick="mostrarCategoria('verduras')">Verduras</button>
+    <button onclick="mostrarCategoria('hortalizas')">Hortalizas</button>
+  </div>
+
+  <h2>📦 Cajas Armadas</h2>
+  <div class="grid" id="cajas"></div>
+</section>
+
+<section>
+  <h2 class="frutas">🍎 Frutas</h2>
+  <div class="grid categoria" id="frutas"></div>
+
+  <h2 class="verduras">🥬 Verduras</h2>
+  <div class="grid categoria" id="verduras"></div>
+
+  <h2 class="hortalizas">🌱 Hortalizas</h2>
+  <div class="grid categoria" id="hortalizas"></div>
+</section>
+
+<div id="carrito">
+  <h3>🧺 Tu caja</h3>
+  <div id="items"></div>
+  <p><strong>Total estimado: $<span id="total">0</span></strong></p>
+  <button onclick="finalizarPedido()">Finalizar pedido por WhatsApp</button>
+</div>
+
+<footer>
+  <p>📍 Entregas coordinadas | 💰 Pago: efectivo o transferencia</p>
+</footer>
+
+<script>
+  const telefono = '54911XXXXXXXX'; // CAMBIAR
+  let carrito = [];
+
+  /*
+  PLANILLA PRODUCTOS (CSV)
+  categoria | nombre | precio | unidad | imagen
+  */
+  const sheetProductos = 'URL_CSV_PRODUCTOS';
+
+  /*
+  PLANILLA CAJAS ARMADAS (CSV)
+  nombre | descripcion | precio | imagen
+  */
+  const sheetCajas = 'URL_CSV_CAJAS';
+
+  fetch(sheetProductos).then(r=>r.text()).then(cargarProductos);
+  fetch(sheetCajas).then(r=>r.text()).then(cargarCajas);
+
+  function cargarProductos(csv) {
+    const lineas = csv.split('\n').slice(1);
+    lineas.forEach(l => {
+      const [categoria,nombre,precio,unidad,imagen] = l.split(',');
+      if(!nombre) return;
+
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <img src="${imagen}">
+        <h3>${nombre}</h3>
+        <div class="precio">$${precio} / ${unidad}</div>
+        <button onclick="agregar('${nombre}',${precio},'${unidad}')">Agregar a la caja</button>`;
+
+      document.getElementById(categoria+'s').appendChild(card);
+    });
+  }
+
+  function cargarCajas(csv) {
+    const lineas = csv.split('\n').slice(1);
+    lineas.forEach(l => {
+      const [nombre,descripcion,precio,imagen] = l.split(',');
+      if(!nombre) return;
+      const card = document.createElement('div');
+      card.className='card';
+      card.innerHTML = `
+        <img src="${imagen}">
+        <h3>${nombre}</h3>
+        <p>${descripcion}</p>
+        <div class="precio">$${precio}</div>
+        <button onclick="pedirCaja('${nombre}',${precio})">Pedir esta caja</button>`;
+      document.getElementById('cajas').appendChild(card);
+    });
+  }
+
+  function agregar(nombre, precio, unidad) {
+    carrito.push({nombre, precio, unidad});
+    renderCarrito();
+  }
+
+  function renderCarrito() {
+    const cont = document.getElementById('items');
+    cont.innerHTML='';
+    let total=0;
+    carrito.forEach(i=>{
+      total+=i.precio;
+      cont.innerHTML+=`<div>- ${i.nombre} ($${i.precio})</div>`;
+    });
+    document.getElementById('total').innerText=total;
+  }
+
+  function finalizarPedido() {
+    if(carrito.length===0){alert('La caja está vacía');return;}
+    let texto='Hola, quiero pedir esta caja:%0A';
+    carrito.forEach(i=> texto+=`- ${i.nombre} ($${i.precio})%0A`);
+    texto+=`Total estimado: $${document.getElementById('total').innerText}`;
+    window.open(`https://wa.me/${telefono}?text=${texto}`);
+  }
+
+  function mostrarCategoria(cat) {
+    document.querySelectorAll('.categoria').forEach(c => c.style.display = 'none');
+    if (cat === 'todas') {
+      document.querySelectorAll('.categoria').forEach(c => c.style.display = 'grid');
+    } else {
+      document.getElementById(cat).style.display = 'grid';
+    }
+  }
+
+  function pedirCaja(nombre, precio) {
+    const msg = `Hola, quiero pedir la ${nombre}. Total $${precio}. ¿Medios de pago y punto de entrega?`;
+    window.open(`https://wa.me/${telefono}?text=${encodeURIComponent(msg)}`);
+  }
+</script>
+
+</body>
+</html>
