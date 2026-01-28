@@ -140,12 +140,21 @@
     cont.innerHTML = '';
     let total = 0;
 
-    carrito.forEach(item => {
+    carrito.forEach((item, index) => {
       total += item.precio;
-      cont.innerHTML += `<div>- ${item.nombre} ($${item.precio})</div>`;
+      cont.innerHTML += `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <span>- ${item.nombre} ($${item.precio})</span>
+          <button style="width:auto;padding:4px 8px;background:#e53935;" onclick="eliminarItem(${index})">✖</button>
+        </div>`;
     });
 
     document.getElementById('total').innerText = total;
+  }
+
+  function eliminarItem(index) {
+    carrito.splice(index, 1);
+    renderCarrito();
   }
 
   function finalizarPedido() {
