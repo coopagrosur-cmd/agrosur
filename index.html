@@ -75,13 +75,13 @@
   PLANILLA PRODUCTOS (CSV)
   categoria | nombre | precio | unidad | imagen
   */
-  const sheetProductos = 'URL_CSV_PRODUCTOS';
+  const sheetProductos = 'https://docs.google.com/spreadsheets/d/1dicHxCK6YaK-Hm3PhJ0JjNQgFXedx7AgC_dqutjzujU/edit?usp=sharing';
 
   /*
   PLANILLA CAJAS ARMADAS (CSV)
   nombre | descripcion | precio | imagen
   */
-  const sheetCajas = 'URL_CSV_CAJAS';
+  const sheetCajas = 'https://docs.google.com/spreadsheets/d/1yD_8ASw6g5Uy8yg6oTOFndGSRor6C9MRHvGDt6LwBR8/edit?usp=sharing';
 
   fetch(sheetProductos).then(r=>r.text()).then(cargarProductos);
   fetch(sheetCajas).then(r=>r.text()).then(cargarCajas);
