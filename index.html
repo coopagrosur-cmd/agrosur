@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AgroSur – Frutas y Verduras</title>
 
-  <!-- COLORES VIVOS TIPO FERIA -->
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: #fffdf5; }
     header { background: linear-gradient(90deg, #ff9800, #4caf50); color: white; padding: 25px; text-align: center; }
@@ -21,9 +20,23 @@
     .precio { font-size: 1.1em; font-weight: bold; margin: 8px 0; }
     button { background: #ff9800; color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; cursor: pointer; font-size: 1em; }
     button:hover { background: #fb8c00; }
-    footer { background: #2e7d32; color: white; text-align: center; padding: 18px; margin-top: 40px; }
-    #carrito { position: fixed; bottom: 0; left: 0; right: 0; background: #ffffff; border-top: 3px solid #4caf50; padding: 15px; box-shadow: 0 -4px 10px rgba(0,0,0,0.15); }
+    footer { background: #2e7d32; color: white; text-align: center; padding: 18px; margin-top: 120px; }
+
+    #carrito {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border-top: 3px solid #4caf50;
+      padding: 15px;
+      box-shadow: 0 -4px 10px rgba(0,0,0,0.15);
+    }
+
     #carrito h3 { margin-top: 0; }
+
+    .filtros { text-align: center; margin-bottom: 20px; }
+    .filtros button { width: auto; margin: 5px; padding: 10px 18px; }
   </style>
 </head>
 <body>
@@ -34,18 +47,18 @@
 </header>
 
 <section>
-  <div style="text-align:center;margin-bottom:20px;">
+  <h2>📦 Cajas Armadas</h2>
+  <div class="grid" id="cajas"></div>
+</section>
+
+<section>
+  <div class="filtros">
     <button onclick="mostrarCategoria('todas')">Todos</button>
     <button onclick="mostrarCategoria('frutas')">Frutas</button>
     <button onclick="mostrarCategoria('verduras')">Verduras</button>
     <button onclick="mostrarCategoria('hortalizas')">Hortalizas</button>
   </div>
 
-  <h2>📦 Cajas Armadas</h2>
-  <div class="grid" id="cajas"></div>
-</section>
-
-<section>
   <h2 class="frutas">🍎 Frutas</h2>
   <div class="grid categoria" id="frutas"></div>
 
@@ -68,81 +81,89 @@
 </footer>
 
 <script>
-  const telefono = '54911XXXXXXXX'; // CAMBIAR
+  const telefono = '54911XXXXXXXX'; // CAMBIAR POR TU WHATSAPP
+
+  const sheetProductos = 'https://docs.google.com/spreadsheets/d/1dicHxCK6YaK-Hm3PhJ0JjNQgFXedx7AgC_dqutjzujU/export?format=csv&gid=0';
+  const sheetCajas = 'https://docs.google.com/spreadsheets/d/1yD_8ASw6g5Uy8yg6oTOFndGSRor6C9MRHvGDt6LwBR8/export?format=csv&gid=0';
+
   let carrito = [];
 
-  /*
-  PLANILLA PRODUCTOS (CSV)
-  categoria | nombre | precio | unidad | imagen
-  */
-  const sheetProductos = 'https://docs.google.com/spreadsheets/d/1dicHxCK6YaK-Hm3PhJ0JjNQgFXedx7AgC_dqutjzujU/edit?usp=sharing';
-
-  /*
-  PLANILLA CAJAS ARMADAS (CSV)
-  nombre | descripcion | precio | imagen
-  */
-  const sheetCajas = https://docs.google.com/spreadsheets/d/1yD_8ASw6g5Uy8yg6oTOFndGSRor6C9MRHvGDt6LwBR8/edit?usp=sharing;
-
-  fetch(sheetProductos).then(r=>r.text()).then(cargarProductos);
-  fetch(sheetCajas).then(r=>r.text()).then(cargarCajas);
+  fetch(sheetProductos).then(r => r.text()).then(cargarProductos);
+  fetch(sheetCajas).then(r => r.text()).then(cargarCajas);
 
   function cargarProductos(csv) {
     const lineas = csv.split('\n').slice(1);
     lineas.forEach(l => {
-      const [categoria,nombre,precio,unidad,imagen] = l.split(',');
-      if(!nombre) return;
+      const [categoria, nombre, precio, unidad, imagen] = l.split(',');
+      if (!nombre) return;
 
       const card = document.createElement('div');
       card.className = 'card';
       card.innerHTML = `
-        <img src="${imagen}">
+        <img src="${imagen}" alt="${nombre}">
         <h3>${nombre}</h3>
         <div class="precio">$${precio} / ${unidad}</div>
-        <button onclick="agregar('${nombre}',${precio},'${unidad}')">Agregar a la caja</button>`;
+        <button onclick="agregarProducto('${nombre}', ${precio}, '${unidad}')">Agregar a la caja</button>
+      `;
 
-      document.getElementById(categoria+'s').appendChild(card);
+      document.getElementById(categoria + 's').appendChild(card);
     });
   }
 
   function cargarCajas(csv) {
     const lineas = csv.split('\n').slice(1);
     lineas.forEach(l => {
-      const [nombre,descripcion,precio,imagen] = l.split(',');
-      if(!nombre) return;
+      const [nombre, descripcion, precio, imagen] = l.split(',');
+      if (!nombre) return;
+
       const card = document.createElement('div');
-      card.className='card';
+      card.className = 'card';
       card.innerHTML = `
-        <img src="${imagen}">
+        <img src="${imagen}" alt="${nombre}">
         <h3>${nombre}</h3>
         <p>${descripcion}</p>
         <div class="precio">$${precio}</div>
-        <button onclick="pedirCaja('${nombre}',${precio})">Pedir esta caja</button>`;
+        <button onclick="pedirCaja('${nombre}', ${precio})">Pedir esta caja</button>
+      `;
+
       document.getElementById('cajas').appendChild(card);
     });
   }
 
-  function agregar(nombre, precio, unidad) {
-    carrito.push({nombre, precio, unidad});
+  function agregarProducto(nombre, precio, unidad) {
+    carrito.push({ nombre, precio, unidad });
     renderCarrito();
   }
 
   function renderCarrito() {
     const cont = document.getElementById('items');
-    cont.innerHTML='';
-    let total=0;
-    carrito.forEach(i=>{
-      total+=i.precio;
-      cont.innerHTML+=`<div>- ${i.nombre} ($${i.precio})</div>`;
+    cont.innerHTML = '';
+    let total = 0;
+
+    carrito.forEach(item => {
+      total += item.precio;
+      cont.innerHTML += `<div>- ${item.nombre} ($${item.precio})</div>`;
     });
-    document.getElementById('total').innerText=total;
+
+    document.getElementById('total').innerText = total;
   }
 
   function finalizarPedido() {
-    if(carrito.length===0){alert('La caja está vacía');return;}
-    let texto='Hola, quiero pedir esta caja:%0A';
-    carrito.forEach(i=> texto+=`- ${i.nombre} ($${i.precio})%0A`);
-    texto+=`Total estimado: $${document.getElementById('total').innerText}`;
-    window.open(`https://wa.me/${telefono}?text=${texto}`);
+    if (carrito.length === 0) {
+      alert('La caja está vacía');
+      return;
+    }
+
+    let mensaje = 'Hola, quiero hacer este pedido:%0A';
+    carrito.forEach(i => mensaje += `- ${i.nombre} ($${i.precio})%0A`);
+    mensaje += `Total estimado: $${document.getElementById('total').innerText}`;
+
+    window.open(`https://wa.me/${telefono}?text=${mensaje}`);
+  }
+
+  function pedirCaja(nombre, precio) {
+    const mensaje = `Hola, quiero pedir la ${nombre}. Total estimado $${precio}. ¿Medios de pago y punto de entrega?`;
+    window.open(`https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`);
   }
 
   function mostrarCategoria(cat) {
@@ -152,11 +173,6 @@
     } else {
       document.getElementById(cat).style.display = 'grid';
     }
-  }
-
-  function pedirCaja(nombre, precio) {
-    const msg = `Hola, quiero pedir la ${nombre}. Total $${precio}. ¿Medios de pago y punto de entrega?`;
-    window.open(`https://wa.me/${telefono}?text=${encodeURIComponent(msg)}`);
   }
 </script>
 
