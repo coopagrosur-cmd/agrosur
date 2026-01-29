@@ -6,7 +6,7 @@
 <title>AgroSur – Frutas y Verduras</title>
 
 <style>
-/* Estilos Base mejorados */
+/* Estilos Base */
 body { font-family:'Segoe UI',Arial,sans-serif; margin:0; background:#fffdf5; padding-bottom: 220px; }
 header { background:linear-gradient(90deg,#ff9800,#4caf50); color:white; padding:25px; }
 .header-contenido { display:flex; gap:18px; align-items:center; justify-content:center; flex-wrap:wrap; text-align:center; }
@@ -28,7 +28,7 @@ section { padding:25px; max-width:1200px; margin:auto; }
 .card img { width:100%; height:150px; object-fit:cover; border-radius:10px; background:#f0f0f0; margin-bottom: 10px; }
 .precio { font-weight:bold; margin:8px 0; font-size: 1.2rem; color: #2e7d32; }
 
-button.btn-add { background:#ff9800; color:white; border:none; padding:10px; width:100%; border-radius:8px; cursor:pointer; font-weight:bold; transition: 0.2s; }
+button.btn-add { background:#ff9800; color:white; border:none; padding:12px; width:100%; border-radius:8px; cursor:pointer; font-weight:bold; transition: 0.2s; }
 button.btn-add:hover { background:#fb8c00; transform: scale(1.02); }
 
 /* Carrito Flotante */
@@ -139,13 +139,13 @@ fetch(sheetProductos)
               <h3>${n}</h3>
               <div class="precio">$${p} <small>/ ${u}</small></div>
             </div>
-            <button class="btn-add" onclick="add('${n}',${p},'${u}')">Agregar al carrito</button>
+            <button class="btn-add" onclick="add('${n}',${p},'${u}')">Agregar</button>
           </div>`;
       }
     });
   });
 
-/* Carga de Cajas (Ahora se agregan al carrito) */
+/* Carga de Cajas */
 fetch(sheetCajas)
   .then(r => r.text())
   .then(t => {
@@ -156,10 +156,10 @@ fetch(sheetCajas)
           <img src="${img}" onerror="this.src='https://via.placeholder.com/150?text=Caja+AgroSur'">
           <div>
             <h3>${n}</h3>
-            <p style="font-size: 0.85rem; color: #666;">${d}</p>
+            <p style="font-size: 0.85rem; color: #666; height: 40px; overflow: hidden;">${d}</p>
             <div class="precio">$${p}</div>
           </div>
-          <button class="btn-add" onclick="add('${n}',${p},'Caja')">Quiero esta Caja</button>
+          <button class="btn-add" onclick="add('${n}',${p},'Caja')">Quiero esta caja</button>
         </div>`;
     });
   });
@@ -170,7 +170,6 @@ function filtrar(cat) {
   });
 }
 
-/* --- CARRITO --- */
 function add(n, p, u) { 
   carrito.push({ n, p: parseFloat(p), u }); 
   render(); 
@@ -200,14 +199,13 @@ function del(idx) {
   render(); 
 }
 
-/* --- WHATSAPP CON DETALLE DE UNIDADES --- */
+/* --- WHATSAPP PERSONALIZADO --- */
 function finalizarPedido() {
   if (carrito.length === 0) return alert('El carrito está vacío');
   
   let resumen = {};
   let total = 0;
   
-  // Agrupamos por nombre para sumar cantidades
   carrito.forEach(i => {
     if(!resumen[i.n]) {
       resumen[i.n] = { qty: 0, unit: i.u, subtotal: 0 };
@@ -217,17 +215,18 @@ function finalizarPedido() {
     total += i.p;
   });
 
-  let msg = '🥦 *Nuevo Pedido - AgroSur* %0A%0A';
-  msg += 'Hola! Quiero realizar el siguiente pedido:%0A%0A';
+  // Título solicitado
+  let msg = 'Hola AgroSur! Quiero realizar el siguiente pedido:%0A%0A';
   
+  // Listado de productos
   for (let prod in resumen) {
     const item = resumen[prod];
-    // Formato: - Manzana: 2 (kg)
     msg += `• *${prod}*: ${item.qty} (${item.unit})%0A`;
   }
   
-  msg += `%0A💰 *Total a pagar: $${total}*`;
-  msg += `%0A%0A📍 _Por favor, coordine la entrega conmigo._`;
+  // Total y Leyenda de cierre solicitada
+  msg += `%0A💰 *Total a pagar: $${total.toLocaleString()}*`;
+  msg += `%0A%0APara coordinar la entrega y método de pago: efectivo o transferencia, por favor. Gracias!`;
   
   window.open(`https://wa.me/${telefono}?text=${msg}`);
 }
