@@ -6,16 +6,15 @@
 <title>AgroSur – Frutas y Verduras</title>
 
 <style>
-/* Estilos Base */
-body { font-family:'Segoe UI',Arial,sans-serif; margin:0; background:#fffdf5; padding-bottom: 200px; }
+/* Estilos Base mejorados */
+body { font-family:'Segoe UI',Arial,sans-serif; margin:0; background:#fffdf5; padding-bottom: 220px; }
 header { background:linear-gradient(90deg,#ff9800,#4caf50); color:white; padding:25px; }
 .header-contenido { display:flex; gap:18px; align-items:center; justify-content:center; flex-wrap:wrap; text-align:center; }
 .logo { max-width:120px; border-radius:50%; background:white; padding:5px; }
 
 section { padding:25px; max-width:1200px; margin:auto; }
 
-/* Filtros */
-.filtros { text-align:center; margin-bottom:25px; position: sticky; top: 0; background: #fffdf5; padding: 10px; z-index: 10; }
+.filtros { text-align:center; margin-bottom:25px; position: sticky; top: 0; background: #fffdf5; padding: 10px; z-index: 10; border-bottom: 1px dashed #4caf50; }
 .filtros button { 
     width:auto; margin:5px; padding:10px 18px; 
     background: #4caf50; border: none; color: white; 
@@ -25,24 +24,22 @@ section { padding:25px; max-width:1200px; margin:auto; }
 
 .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:18px; }
 
-/* Tarjetas */
-.card { background:white; border-radius:14px; padding:15px; box-shadow:0 6px 14px rgba(0,0,0,.12); text-align:center; }
-.card img { width:100%; height:150px; object-fit:cover; border-radius:10px; background:#f0f0f0; }
+.card { background:white; border-radius:14px; padding:15px; box-shadow:0 6px 14px rgba(0,0,0,.12); text-align:center; display: flex; flex-direction: column; justify-content: space-between; }
+.card img { width:100%; height:150px; object-fit:cover; border-radius:10px; background:#f0f0f0; margin-bottom: 10px; }
 .precio { font-weight:bold; margin:8px 0; font-size: 1.2rem; color: #2e7d32; }
 
-button.btn-add { background:#ff9800; color:white; border:none; padding:10px; width:100%; border-radius:8px; cursor:pointer; font-weight:bold; }
-button.btn-add:hover { background:#fb8c00; }
-
-footer { background:#2e7d32; color:white; text-align:center; padding:18px; }
+button.btn-add { background:#ff9800; color:white; border:none; padding:10px; width:100%; border-radius:8px; cursor:pointer; font-weight:bold; transition: 0.2s; }
+button.btn-add:hover { background:#fb8c00; transform: scale(1.02); }
 
 /* Carrito Flotante */
 #carrito {
   position:fixed; bottom:0; left:0; right:0;
-  background:#fff; border-top:4px solid #4caf50;
-  padding:15px; box-shadow:0 -4px 15px rgba(0,0,0,0.2);
-  max-height:180px; overflow-y:auto; z-index: 100;
+  background:#fff; border-top:5px solid #ff9800;
+  padding:15px; box-shadow:0 -5px 20px rgba(0,0,0,0.2);
+  max-height:200px; overflow-y:auto; z-index: 100;
 }
-.item-carrito { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+.item-carrito { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #f0f0f0; padding-bottom: 5px; font-size: 0.95rem; }
+.btn-del { background:#ffeded; color:#d32f2f; border:1px solid #ffcdd2; border-radius:5px; padding:2px 8px; cursor:pointer; }
 </style>
 </head>
 
@@ -88,12 +85,12 @@ footer { background:#2e7d32; color:white; text-align:center; padding:18px; }
 </section>
 
 <div id="carrito">
-  <div style="display:flex; justify-content:space-between; align-items:center;">
-    <h3 style="margin:0;">🧺 Tu pedido</h3>
+  <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid #4caf50; padding-bottom: 5px; margin-bottom: 10px;">
+    <h3 style="margin:0;">🧺 Tu Pedido</h3>
     <strong>Total: $<span id="total">0</span></strong>
   </div>
-  <div id="items-carrito" style="margin: 10px 0;"></div>
-  <button class="btn-add" onclick="finalizarPedido()">Finalizar pedido por WhatsApp</button>
+  <div id="items-carrito"></div>
+  <button class="btn-add" style="margin-top: 10px;" onclick="finalizarPedido()">Finalizar pedido por WhatsApp</button>
 </div>
 
 <script>
@@ -104,7 +101,6 @@ const sheetCajas = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSOm48PgZGpZ
 
 let carrito = [];
 
-/* Mapeo de categorías para evitar errores de escritura en el Excel */
 function mapCategoria(cat) {
   if (!cat) return null;
   const c = cat.toLowerCase();
@@ -132,55 +128,49 @@ function parseCSV(text) {
 fetch(sheetProductos)
   .then(r => r.text())
   .then(t => {
-    const filas = parseCSV(t).slice(1);
-    filas.forEach(([cat, n, p, u, img]) => {
+    parseCSV(t).slice(1).forEach(([cat, n, p, u, img]) => {
       const catLimpia = mapCategoria(cat);
-      const gridId = `grid-${catLimpia}`;
-      const grid = document.getElementById(gridId);
-      
+      const grid = document.getElementById(`grid-${catLimpia}`);
       if (grid && n) {
         grid.innerHTML += `
           <div class="card">
             <img src="${img}" onerror="this.src='https://via.placeholder.com/150?text=AgroSur'">
-            <h3>${n}</h3>
-            <div class="precio">$${p} <small>/ ${u}</small></div>
-            <button class="btn-add" onclick="add('${n}',${p},'${u}')">Agregar</button>
+            <div>
+              <h3>${n}</h3>
+              <div class="precio">$${p} <small>/ ${u}</small></div>
+            </div>
+            <button class="btn-add" onclick="add('${n}',${p},'${u}')">Agregar al carrito</button>
           </div>`;
       }
     });
   });
 
-/* Carga de Cajas */
+/* Carga de Cajas (Ahora se agregan al carrito) */
 fetch(sheetCajas)
   .then(r => r.text())
   .then(t => {
-    const filas = parseCSV(t).slice(1);
-    filas.forEach(([n, d, p, img]) => {
+    parseCSV(t).slice(1).forEach(([n, d, p, img]) => {
       if (!n) return;
       document.getElementById('cajas').innerHTML += `
         <div class="card">
           <img src="${img}" onerror="this.src='https://via.placeholder.com/150?text=Caja+AgroSur'">
-          <h3>${n}</h3>
-          <p>${d}</p>
-          <div class="precio">$${p}</div>
-          <button class="btn-add" onclick="caja('${n}',${p})">Pedir Caja</button>
+          <div>
+            <h3>${n}</h3>
+            <p style="font-size: 0.85rem; color: #666;">${d}</p>
+            <div class="precio">$${p}</div>
+          </div>
+          <button class="btn-add" onclick="add('${n}',${p},'Caja')">Agregar Caja</button>
         </div>`;
     });
   });
 
-/* Lógica de Filtros */
 function filtrar(cat) {
-  const secciones = document.querySelectorAll('.seccion-categoria');
-  secciones.forEach(sec => {
-    if (cat === 'todas') {
-      sec.style.display = 'block';
-    } else {
-      sec.style.display = sec.id === `contenedor-${cat}` ? 'block' : 'none';
-    }
+  document.querySelectorAll('.seccion-categoria').forEach(sec => {
+    sec.style.display = (cat === 'todas' || sec.id === `contenedor-${cat}`) ? 'block' : 'none';
   });
 }
 
-/* Lógica del Carrito */
+/* --- CARRITO --- */
 function add(n, p, u) { 
   carrito.push({ n, p: parseFloat(p), u }); 
   render(); 
@@ -196,12 +186,12 @@ function render() {
     total += i.p;
     html += `
       <div class="item-carrito">
-        <span>${i.n} ($${i.p})</span>
-        <button onclick="del(${idx})" style="background:red; color:white; border:none; border-radius:5px; cursor:pointer;">✕</button>
+        <span><strong>${i.n}</strong> (${i.u}) - $${i.p}</span>
+        <button class="btn-del" onclick="del(${idx})">✕</button>
       </div>`;
   });
 
-  contenedorItems.innerHTML = html;
+  contenedorItems.innerHTML = html || '<p style="color:#999; text-align:center;">El carrito está vacío</p>';
   contenedorTotal.innerText = total.toLocaleString();
 }
 
@@ -210,26 +200,36 @@ function del(idx) {
   render(); 
 }
 
+/* --- WHATSAPP CON DETALLE DE UNIDADES --- */
 function finalizarPedido() {
   if (carrito.length === 0) return alert('El carrito está vacío');
+  
   let resumen = {};
   let total = 0;
+  
+  // Agrupamos por nombre para sumar cantidades
   carrito.forEach(i => {
-    resumen[i.n] = (resumen[i.n] || 0) + 1;
+    if(!resumen[i.n]) {
+      resumen[i.n] = { qty: 0, unit: i.u, subtotal: 0 };
+    }
+    resumen[i.n].qty += 1;
+    resumen[i.n].subtotal += i.p;
     total += i.p;
   });
 
-  let msg = 'Hola AgroSur! Quiero realizar este pedido:%0A%0A';
+  let msg = '🥦 *Nuevo Pedido - AgroSur* %0A%0A';
+  msg += 'Hola! Quiero realizar el siguiente pedido:%0A%0A';
+  
   for (let prod in resumen) {
-    msg += `• ${prod} x${resumen[prod]}%0A`;
+    const item = resumen[prod];
+    // Formato: - Manzana: 2 (kg)
+    msg += `• *${prod}*: ${item.qty} (${item.unit})%0A`;
   }
-  msg += `%0A*Total: $${total}*`;
+  
+  msg += `%0A💰 *Total a pagar: $${total}*`;
+  msg += `%0A%0A📍 _Por favor, coordine la entrega conmigo._`;
+  
   window.open(`https://wa.me/${telefono}?text=${msg}`);
-}
-
-function caja(n, p) {
-  const msg = `Hola AgroSur! Quiero pedir la ${n} por $${p}`;
-  window.open(`https://wa.me/${telefono}?text=${encodeURIComponent(msg)}`);
 }
 </script>
 
