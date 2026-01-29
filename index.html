@@ -9,7 +9,7 @@
 /* ===== ESTILOS BASE ===== */
 body { font-family:'Segoe UI',Arial,sans-serif; margin:0; background:#fffdf5; padding-bottom: 220px; }
 
-/* ===== HEADER PROFESIONAL (Actualizado) ===== */
+/* ===== HEADER PROFESIONAL ===== */
 header { 
     background: linear-gradient(90deg,#ff9800,#4caf50); 
     color: white; 
@@ -42,6 +42,16 @@ header h1 {
   text-shadow: 0 3px 8px rgba(0,0,0,0.25);
 }
 
+/* SUBTÍTULO */
+header h2 {
+  margin: 6px 0 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: #fff8e1;
+}
+
+/* ESLOGAN */
 header p {
   margin-top: 6px;
   font-size: 1.1rem;
@@ -54,7 +64,7 @@ header p {
 header p::before { content: "🌿 "; }
 header p::after { content: " 🌿"; }
 
-/* Separador visual sutil */
+/* Separador visual */
 .header-contenido > div { position: relative; }
 .header-contenido > div::after {
   content: "";
@@ -66,9 +76,10 @@ header p::after { content: " 🌿"; }
   border-radius: 2px;
 }
 
-/* Responsive del Header */
+/* Responsive Header */
 @media (max-width: 600px) {
   header h1 { font-size: 2.1rem; }
+  header h2 { font-size: 1.1rem; }
   header p { font-size: 1rem; }
   .logo { max-width: 100px; }
 }
@@ -115,7 +126,10 @@ button.btn-add:hover { background:#fb8c00; }
   padding:20px; box-shadow:0 -5px 25px rgba(0,0,0,0.2);
   max-height:220px; overflow-y:auto; z-index: 100;
 }
-.item-carrito { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #f0f0f0; padding-bottom: 5px; }
+.item-carrito { 
+  display: flex; justify-content: space-between; align-items: center; 
+  margin-bottom: 8px; border-bottom: 1px solid #f0f0f0; padding-bottom: 5px; 
+}
 </style>
 </head>
 
@@ -126,6 +140,7 @@ button.btn-add:hover { background:#fb8c00; }
     <img class="logo" src="https://raw.githubusercontent.com/coopagrosur-cmd/imagenes-agrosur/refs/heads/main/logo.png" alt="Logo AgroSur">
     <div>
       <h1>AgroSur</h1>
+      <h2>Frutas & Verduras</h2>
       <p>Del productor a tu mesa</p>
     </div>
   </div>
