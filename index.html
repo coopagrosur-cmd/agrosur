@@ -6,13 +6,12 @@
 <title>AgroSur – Frutas y Verduras</title>
 
 <style>
-body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: #fffdf5; }
-header { background: linear-gradient(90deg,#ff9800,#4caf50); color:white; padding:25px; }
+body { font-family:'Segoe UI',Arial,sans-serif; margin:0; background:#fffdf5; }
+header { background:linear-gradient(90deg,#ff9800,#4caf50); color:white; padding:25px; }
 .header-contenido { display:flex; gap:18px; align-items:center; justify-content:center; flex-wrap:wrap; text-align:center; }
 .logo { max-width:120px; border-radius:50%; background:white; padding:5px; }
 
 section { padding:25px; max-width:1200px; margin:auto; }
-
 .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:18px; }
 
 .card {
@@ -71,7 +70,7 @@ footer {
 
 <header>
   <div class="header-contenido">
-    <img class="logo" src="https://raw.githubusercontent.com/coopagrosur-cmd/imagenes-agrosur/refs/heads/main/logo.png" alt="Logo AgroSur">
+    <img class="logo" src="https://raw.githubusercontent.com/coopagrosur-cmd/imagenes-agrosur/refs/heads/main/logo.png">
     <div>
       <h1>AgroSur Frutas y Verduras</h1>
       <p>Del productor a tu mesa</p>
@@ -86,13 +85,13 @@ footer {
 
 <section>
   <h2>🍎 Frutas</h2>
-  <div class="grid" id="frutass"></div>
+  <div class="grid" id="frutas"></div>
 
   <h2>🥬 Verduras</h2>
-  <div class="grid" id="verdurass"></div>
+  <div class="grid" id="verduras"></div>
 
   <h2>🌱 Hortalizas</h2>
-  <div class="grid" id="hortalizass"></div>
+  <div class="grid" id="hortalizas"></div>
 </section>
 
 <div id="carrito">
@@ -103,7 +102,7 @@ footer {
 </div>
 
 <footer>
-  <p>📍 Entregas coordinadas | 💰 Pago: efectivo o transferencia</p>
+<p>📍 Entregas coordinadas | 💰 Pago: efectivo o transferencia</p>
 </footer>
 
 <script>
@@ -114,80 +113,71 @@ const sheetCajas = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSOm48PgZGpZ
 
 let carrito = [];
 
-/* ===== PARSER CSV CORREGIDO (coma o punto y coma) ===== */
-function parseCSV(text) {
+/* ===== CSV parser compatible ; y , ===== */
+function parseCSV(text){
   const lines = text.trim().split('\n');
-  const delimiter = lines[0].includes(';') ? ';' : ',';
+  const sep = lines[0].includes(';') ? ';' : ',';
 
-  return lines.map(line => {
-    let result = [];
-    let current = '';
-    let inQuotes = false;
-
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
-
-      if (char === '"') {
-        inQuotes = !inQuotes;
-      } else if (char === delimiter && !inQuotes) {
-        result.push(current);
-        current = '';
-      } else {
-        current += char;
-      }
+  return lines.map(l=>{
+    let r=[],c='',q=false;
+    for(let i=0;i<l.length;i++){
+      const ch=l[i];
+      if(ch=='"') q=!q;
+      else if(ch===sep && !q){ r.push(c); c=''; }
+      else c+=ch;
     }
-
-    result.push(current);
-    return result.map(v => v.replace(/^"|"$/g, '').trim());
+    r.push(c);
+    return r.map(x=>x.replace(/^"|"$/g,'').trim());
   });
 }
 
-function obtenerImagen(url) {
-  if (!url) return 'https://via.placeholder.com/150?text=AgroSur';
-  if (url.includes('drive.google.com')) {
-    const m = url.match(/id=([^&]+)/) || url.match(/\/d\/([^/]+)/);
-    return m ? `https://drive.google.com/uc?export=view&id=${m[1]}` : url;
+function obtenerImagen(url){
+  if(!url) return 'https://via.placeholder.com/150?text=AgroSur';
+  if(url.includes('drive.google.com')){
+    const m=url.match(/id=([^&]+)/)||url.match(/\/d\/([^/]+)/);
+    return m?`https://drive.google.com/uc?export=view&id=${m[1]}`:url;
   }
   return url;
 }
 
-/* ===== PRODUCTOS ===== */
+/* ===== PRODUCTOS (CORREGIDO) ===== */
 fetch(sheetProductos)
-  .then(r => r.text())
-  .then(t => {
-    parseCSV(t).slice(1).forEach(([cat, n, p, u, img]) => {
-      if (!n || !cat) return;
+.then(r=>r.text())
+.then(t=>{
+  parseCSV(t).slice(1).forEach(([cat,n,p,u,img])=>{
+    if(!cat||!n) return;
 
-      const id = cat.toLowerCase() + 's';
-      const cont = document.getElementById(id);
-      if (!cont) return;
+    const key = cat.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+    const cont = document.getElementById(key);
 
-      cont.innerHTML += `
-        <div class="card">
-          <img src="${obtenerImagen(img)}" alt="${n}" onerror="this.src='https://via.placeholder.com/150?text=Sin+Imagen'">
-          <h3>${n}</h3>
-          <div class="precio">$${p} / ${u}</div>
-          <button onclick="add('${n}',${p},'${u}')">Agregar</button>
-        </div>`;
-    });
+    if(!cont) return;
+
+    cont.innerHTML += `
+      <div class="card">
+        <img src="${obtenerImagen(img)}" onerror="this.src='https://via.placeholder.com/150?text=Sin+Imagen'">
+        <h3>${n}</h3>
+        <div class="precio">$${p} / ${u}</div>
+        <button onclick="add('${n}',${p},'${u}')">Agregar</button>
+      </div>`;
   });
+});
 
 /* ===== CAJAS ===== */
 fetch(sheetCajas)
-  .then(r => r.text())
-  .then(t => {
-    parseCSV(t).slice(1).forEach(([n, d, p, img]) => {
-      if (!n) return;
-      document.getElementById('cajas').innerHTML += `
-        <div class="card">
-          <img src="${obtenerImagen(img)}" alt="${n}" onerror="this.src='https://via.placeholder.com/150?text=Sin+Imagen'">
-          <h3>${n}</h3>
-          <p>${d}</p>
-          <div class="precio">$${p}</div>
-          <button onclick="caja('${n}',${p})">Pedir</button>
-        </div>`;
-    });
+.then(r=>r.text())
+.then(t=>{
+  parseCSV(t).slice(1).forEach(([n,d,p,img])=>{
+    if(!n) return;
+    document.getElementById('cajas').innerHTML += `
+      <div class="card">
+        <img src="${obtenerImagen(img)}">
+        <h3>${n}</h3>
+        <p>${d}</p>
+        <div class="precio">$${p}</div>
+        <button onclick="caja('${n}',${p})">Pedir</button>
+      </div>`;
   });
+});
 
 function add(n,p,u){
   carrito.push({n,p,u});
@@ -195,40 +185,28 @@ function add(n,p,u){
 }
 
 function render(){
-  let total = 0;
-  let out = '';
-  carrito.forEach((i,idx) => {
-    total += parseFloat(i.p);
-    out += `<div>${i.n} $${i.p} 
-      <button onclick="del(${idx})" style="width:auto;padding:2px 6px;">✖</button>
+  let t=0,html='';
+  carrito.forEach((i,x)=>{
+    t+=parseFloat(i.p);
+    html+=`<div>${i.n} $${i.p}
+      <button onclick="del(${x})" style="width:auto;padding:2px 6px;">✖</button>
     </div>`;
   });
-  document.getElementById('items').innerHTML = out;
-  document.getElementById('total').innerText = total;
+  items.innerHTML=html;
+  total.innerText=t;
 }
 
-function del(i){
-  carrito.splice(i,1);
-  render();
-}
+function del(i){ carrito.splice(i,1); render(); }
 
 function finalizarPedido(){
-  if (!carrito.length) return alert('El carrito está vacío');
-
-  let resumen = {};
-  let total = 0;
-
-  carrito.forEach(i => {
-    resumen[i.n] = (resumen[i.n] || 0) + 1;
-    total += parseFloat(i.p);
+  if(!carrito.length) return alert('El carrito está vacío');
+  let r={},t=0,msg='Hola, quiero pedir:%0A';
+  carrito.forEach(i=>{
+    r[i.n]=(r[i.n]||0)+1;
+    t+=parseFloat(i.p);
   });
-
-  let msg = 'Hola, quiero pedir:%0A';
-  for (let k in resumen) {
-    msg += `- ${k}: ${resumen[k]}%0A`;
-  }
-  msg += `Total: $${total}`;
-
+  for(let k in r) msg+=`- ${k}: ${r[k]}%0A`;
+  msg+=`Total: $${t}`;
   window.open(`https://wa.me/${telefono}?text=${msg}`);
 }
 
