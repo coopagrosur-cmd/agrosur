@@ -37,13 +37,51 @@
 
     .filtros { text-align: center; margin-bottom: 20px; }
     .filtros button { width: auto; margin: 5px; padding: 10px 18px; }
+.header {
+  background: linear-gradient(90deg, #ff9800, #4caf50);
+  color: white;
+  padding: 25px;
+}
+
+.header-contenido {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  text-align: center;
+}
+
+.logo {
+  max-width: 120px;
+}
+
+.texto-header h1 {
+  margin: 0;
+  font-size: 2.2em;
+}
+
+.texto-header p {
+  margin: 5px 0 0;
+  font-size: 1.1em;
+  font-weight: 500;
+}
   </style>
 </head>
 <body>
 
 <header>
-  <h1>🌱 AgroSur – Frutas y Verduras</h1>
-  <p><strong>Directo del productor a tu mesa</strong></p>
+<div class="header-contenido">
+    <img 
+      src="https://drive.google.com/uc?id=1mRQfGgIRoEBvHi8AsMIzeFu6afQ_actf"
+      alt="AgroSur Logo"
+      class="logo"
+    >
+    <div class="texto-header">
+      <h1>AgroSur Frutas y Verduras</h1>
+      <p>Del productor a tu mesa</p>
+    </div>
+  </div>
 </header>
 
 <section>
@@ -81,7 +119,7 @@
 </footer>
 
 <script>
-  const telefono = '5492213084604'; // CAMBIAR POR TU WHATSAPP
+  const telefono = '54911XXXXXXXX'; // CAMBIAR POR TU WHATSAPP
 
   const sheetProductos = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSslFktyPHbT0hm76An5Y5zwQlT98bQSiMQgTz7hXDs5AngXqHbFOpm5vs_hINDF4SAILG1s1Rm95NR/pub?gid=0&single=true&output=csv';
   const sheetCajas = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSOm48PgZGpZtF2vxg2g5UX1xB0yQ_-Hkx2UbHRPRFvB0ZN4Xmw3ZRIwxAFk3O6jXI5eqhLub-FaaIT/pub?gid=0&single=true&output=csv';
